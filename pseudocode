@@ -1,0 +1,131 @@
+## Simplified pseudocode
+
+Algorithm: Multi-Step Compare R Optimization for 2-D ERT Arrays
+
+Input:
+    - Base array set: confi_base
+    - Comprehensive candidate array set: confi_compr
+    - Symmetric candidate set: confi_symme
+    - Two-electrode configuration table: confi_twoele
+    - Precomputed two-electrode Jacobian matrix: Gt
+    - Precomputed two-electrode potential-difference terms: dv
+    - Damping factor: lambda
+    - Growth rate per iteration: increase
+    - Target number of arrays: data_point
+    - Orthogonality threshold: threshold
+
+Output:
+    - Optimized array set: confi_optim
+    - Average relative model resolution history: S
+    - Iteration timing: time_iter
+
+Step 1. Load input data
+    1.1 Load the base dipole-dipole array set.
+    1.2 Load the comprehensive four-electrode candidate set.
+    1.3 Load the symmetric candidate subset.
+    1.4 Load the two-electrode configuration table.
+    1.5 Load the precomputed two-electrode Jacobian matrix Gt.
+    1.6 Load the precomputed two-electrode potential-difference terms dv.
+
+Step 2. Assemble four-electrode sensitivities from two-electrode data
+    2.1 Compute:
+            Gtwo = dv .* Gt
+    2.2 For each four-electrode array ABMN:
+            - find the indices of AM, AN, BM, and BN in the two-electrode table;
+            - assemble the four-electrode sensitivity:
+              G_ABMN =
+                  (G_AM - G_AN - G_BM + G_BN)
+                  /
+                  (dv_AM - dv_AN - dv_BM + dv_BN)
+    2.3 Assemble:
+            - Gb for the base array set
+            - Gc for the comprehensive candidate set
+
+Step 3. Compute the reference model resolution of the comprehensive set
+    3.1 Compute:
+            Ac = Gc^T * Gc
+    3.2 Compute:
+            Bc = (Ac + lambda * C)^(-1)
+    3.3 Extract the diagonal of the reference model resolution matrix:
+            diag_Rc = diag(Bc * Ac)
+
+Step 4. Prepare candidate sets
+    4.1 Remove base arrays from the symmetric candidate set.
+    4.2 Remove base arrays from the full candidate set.
+    4.3 Define the asymmetric candidate set as:
+            full candidate set \ symmetric candidate set
+
+Step 5. Compute the initial model resolution of the base array set
+    5.1 Compute:
+            Ab = Gb^T * Gb
+    5.2 Compute:
+            Bb = (Ab + lambda * C)^(-1)
+    5.3 Extract:
+            diag_Rb = diag(Bb * Ab)
+    5.4 Initialize:
+            - index_optim as the indices of the base arrays
+            - Go = Gb
+            - S(1) = mean(diag_Rb ./ diag_Rc)
+
+Step 6. Stage 1 optimization within the symmetric candidate set
+    Repeat until the predefined switching point is reached
+    or the target number of arrays is met:
+
+    6.1 For each candidate array:
+            - assemble its sensitivity vector g;
+            - compute z = Bb * g;
+            - compute y = Ab * z;
+            - evaluate the model-resolution increment using the Sherman-Morrison update;
+            - compute the ranking value Fcr.
+
+    6.2 Sort all candidates in descending order of Fcr.
+
+    6.3 Select candidates for the current iteration:
+            - accept the highest-ranked candidate first;
+            - for subsequent candidates, compute the normalized correlation
+              with the already selected candidates;
+            - accept a candidate only if the maximum correlation is smaller
+              than the orthogonality threshold.
+
+    6.4 Update the optimized set:
+            - append the accepted candidates to index_optim;
+            - append their sensitivities to Go.
+
+    6.5 Update the model resolution:
+            - Ab = Ab + Gnew^T * Gnew
+            - Bb = (Ab + lambda * C)^(-1)
+            - diag_Rb = diag(Bb * Ab)
+            - update S
+
+    6.6 Remove the selected candidates from the symmetric search space.
+
+Step 7. Stage 2 optimization within the asymmetric candidate set
+    Switch the search space to the asymmetric candidate set.
+
+    Repeat until the total number of selected arrays reaches data_point:
+
+    7.1 Compute Fcr for all remaining candidates.
+    7.2 Rank candidates in descending order of Fcr.
+    7.3 Select candidates using the same orthogonality rule.
+    7.4 Update:
+            - index_optim
+            - Go
+            - Ab
+            - Bb
+            - diag_Rb
+            - S
+    7.5 Remove selected candidates from the asymmetric search space.
+
+Step 8. Output results
+    8.1 Extract the final optimized array set:
+            confi_optim = confi_compr(index_optim)
+    8.2 Save:
+            - optimized array set
+            - S
+            - selected-array counts per iteration
+            - iteration timing
+            - diag_Rb and diag_Rc
+    8.3 Plot:
+            - S versus number of arrays
+            - S versus iteration number
+            - cumulative time versus iteration number
