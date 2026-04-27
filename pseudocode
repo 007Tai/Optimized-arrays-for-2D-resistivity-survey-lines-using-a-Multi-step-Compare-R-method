@@ -92,9 +92,9 @@ Step 6. Stage 1 optimization within the symmetric candidate set
             - append their sensitivities to Go.
 
     6.5 Update the model resolution:
-            - Ab = Ab + Gnew^T * Gnew
-            - Bb = (Ab + lambda * C)^(-1)
-            - diag_Rb = diag(Bb * Ab)
+            - Ab = Go' * Go
+            - Bb = inv(Ab + lambda*C)
+            - diag_Rb(:,temp+1) = sum(Bb.*Ab',2)
             - update S
 
     6.6 Remove the selected candidates from the symmetric search space.
