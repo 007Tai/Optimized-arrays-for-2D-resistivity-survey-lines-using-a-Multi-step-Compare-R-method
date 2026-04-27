@@ -14,7 +14,7 @@ Please note that this repository provides a lightweight workflow-level demonstra
 
 ## Workflow demo
 
-The file [`demo_multi_step_CR_workflow.m`](./multi_step_CR_workflow.m) provides a simplified MATLAB mock-up of the proposed multi-step Compare R optimization workflow.
+The file [`multi_step_CR_workflow.m`](./multi_step_CR_workflow.m) provides a simplified MATLAB mock-up of the proposed multi-step Compare R optimization workflow.
 
 This script demonstrates:
 
@@ -32,4 +32,4 @@ The script uses synthetic placeholder data and mock ranking functions to demonst
 Open MATLAB and run:
 
 ```matlab
-demo_multi_step_CR_workflow
+multi_step_CR_workflow
