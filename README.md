@@ -1,4 +1,7 @@
 # Multi-Step Compare R Optimization for 2-D ERT Arrays
+If you use this workflow or supplementary material, please cite the associated manuscript:
+“Optimized arrays for 2-D resistivity survey lines using a Multi-step Compare R method”
+For access to additional original data or further technical details, please contact the corresponding authors upon reasonable request.
 
 This repository provides a conceptual and simplified implementation of the multi-step Compare R optimization workflow for 2-D electrical resistivity tomography (ERT) array design.
 
